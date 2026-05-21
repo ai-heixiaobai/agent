@@ -1,218 +1,370 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureOps-Agent | Adaptive Automation</title>
+    <title>AutoDeploy-Agent | One-Click Environment Setup</title>
     <style>
-        /* Base Styles & Variables */
+        /* Modern System Theme & Variables */
         :root {
-            --bg-dark: #0a0a0a;
-            --bg-panel: #111111;
-            --text-main: #ededed;
-            --text-muted: #888888;
-            --accent: #33bbff;
-            --accent-hover: #0088cc;
-            --term-bg: #000000;
-            --term-green: #33ff00;
-            --term-red: #ff3333;
-            --term-blue: #33bbff;
-            --term-yellow: #ffcc00;
-            --chat-user: #0070f3;
-            --chat-ai: #2a2a2a;
+            --bg-dark: #050507;
+            --bg-panel: #0b0c10;
+            --bg-panel-muted: #12131a;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #00f0ff;
+            --accent-glow: rgba(0, 240, 255, 0.15);
+            --accent-hover: #00b8cc;
+            --accent-violet: #8b5cf6;
+            --accent-violet-glow: rgba(139, 92, 246, 0.15);
+            
+            --term-bg: #030305;
+            --term-green: #10b981;
+            --term-red: #ef4444;
+            --term-blue: #3b82f6;
+            --term-yellow: #f59e0b;
+            --border-color: rgba(255, 255, 255, 0.08);
         }
 
-        body, html { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-dark); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        body, html { 
+            margin: 0; padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            line-height: 1.6; 
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
         
         * { box-sizing: border-box; }
+        a { color: var(--text-main); text-decoration: none; transition: color 0.2s ease; }
         
-        a { color: var(--text-main); text-decoration: none; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        /* Glowing Backdrops */
+        .glow-bg {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 70%);
+            top: -100px; left: -100px; z-index: -1; pointer-events: none; filter: blur(40px); opacity: 0.6;
+        }
         
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .glow-bg-right {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--accent-violet-glow) 0%, rgba(0,0,0,0) 70%);
+            bottom: -100px; right: -100px; z-index: -1; pointer-events: none; filter: blur(40px); opacity: 0.5;
+        }
 
         /* Navigation */
-        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; }
-        .logo { display: flex; align-items: center; gap: 12px; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; color: #fff;}
-        /* 针对那个蓝色的盾牌做了一点发光处理，匹配其原生质感 */
-        .logo-img { height: 42px; width: 42px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 15px rgba(51, 187, 255, 0.4); border: 1px solid rgba(51, 187, 255, 0.3);}
-        .nav-actions { display: flex; gap: 15px; align-items: center; }
-        .btn-lang { background: transparent; border: 1px solid #555; color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
-        .btn-lang:hover { border-color: var(--text-main); }
-        .btn-primary { background: var(--text-main); color: var(--bg-dark); padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; transition: 0.2s; border: none; cursor: pointer;}
-        .btn-primary:hover { background: #cccccc; }
+        nav { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 20px 0; border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; background: rgba(5, 5, 7, 0.85);
+            backdrop-filter: blur(12px); z-index: 100;
+        }
+        
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 1.4rem; font-weight: 800; color: #fff; }
+        .logo-svg { width: 28px; height: 28px; filter: drop-shadow(0 0 8px var(--accent)); }
+
+        .nav-actions { display: flex; gap: 16px; align-items: center; }
+        .btn-lang { 
+            background: transparent; border: 1px solid var(--border-color); color: #e5e7eb; 
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; 
+        }
+        
+        .btn-primary { 
+            background: #fff; color: #000; padding: 10px 20px; border-radius: 8px; 
+            font-weight: 700; border: none; cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+        .btn-primary:hover { background: #e5e7eb; transform: translateY(-1px); }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #00f0ff 0%, #00a3cc 100%);
+            color: #000; padding: 14px 28px; border-radius: 8px; font-weight: 700; border: none;
+            box-shadow: 0 8px 24px rgba(0, 240, 255, 0.35); cursor: pointer; transition: all 0.2s;
+            font-size: 1.05rem; display: inline-block; text-align: center;
+        }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 240, 255, 0.5); }
 
         /* Hero Section */
-        .hero { padding: 80px 0 60px; display: flex; align-items: center; gap: 50px; flex-wrap: wrap; }
-        .hero-content { flex: 1; min-width: 350px; }
-        .hero h1 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1px; }
-        .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 30px; max-width: 90%; }
-        .hero-visual { flex: 1; min-width: 350px; }
+        .hero { padding: 90px 0; display: flex; align-items: center; gap: 60px; flex-wrap: wrap; }
+        .hero-content { flex: 1.1; min-width: 350px; }
+        .hero h1 { 
+            font-size: 3.5rem; line-height: 1.15; margin-bottom: 20px; font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, #a5f3fc 70%, #00f0ff 100%);
+            -webkit-background-clip: text; 
+            background-clip: text; 
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 35px; line-height: 1.6; }
+        .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+        .hero-visual { flex: 0.9; min-width: 350px; }
 
         /* Terminal UI Simulation */
-        .mac-window { background: var(--term-bg); border-radius: 10px; border: 1px solid #333; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5); font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; }
-        .mac-header { background: #222; padding: 10px 15px; display: flex; gap: 8px; align-items: center; }
+        .mac-window { 
+            background: var(--term-bg); border-radius: 12px; border: 1px solid var(--border-color); 
+            overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.7); 
+            font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.85rem; 
+        }
+        .mac-header { background: #0d0e12; padding: 12px 18px; display: flex; gap: 8px; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
         .mac-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .mac-dot.r { background: #ff5f56; }
-        .mac-dot.y { background: #ffbd2e; }
-        .mac-dot.g { background: #27c93f; }
-        .mac-title { flex: 1; text-align: center; color: #888; font-size: 0.8rem; font-family: sans-serif;}
-        .mac-body { padding: 20px; color: #ddd; height: 350px; overflow-y: hidden; position: relative; }
+        .mac-dot.r { background: #ff5f56; } .mac-dot.y { background: #ffbd2e; } .mac-dot.g { background: #27c93f; }
+        .mac-title { flex: 1; text-align: center; color: #6b7280; font-size: 0.75rem; margin-right: 40px; }
+        .mac-body { padding: 20px; color: #d1d5db; height: 320px; overflow-y: auto; }
         
-        .t-line { margin-bottom: 6px; opacity: 0; animation: fadeIn 0.1s forwards; }
-        .t-green { color: var(--term-green); }
-        .t-red { color: var(--term-red); }
-        .t-blue { color: var(--term-blue); }
-        .t-yellow { color: var(--term-yellow); }
-        .t-dim { color: #666; }
+        .t-line { margin-bottom: 8px; opacity: 0; animation: fadeInLine 0.15s forwards; line-height: 1.5; word-break: break-all; }
+        .t-green { color: var(--term-green); } .t-red { color: var(--term-red); } 
+        .t-blue { color: var(--term-blue); } .t-yellow { color: var(--term-yellow); } 
+        .t-dim { color: #52525b; } .t-prompt { color: var(--accent); margin-right: 8px; }
+        @keyframes fadeInLine { to { opacity: 1; } }
 
-        @keyframes fadeIn { to { opacity: 1; } }
+        /* Products / Services Section */
+        .products-block { padding: 80px 0; border-top: 1px solid var(--border-color); text-align: center; }
+        .section-title { font-size: 2.5rem; margin-bottom: 16px; font-weight: 800; color: #fff; }
+        .section-desc { color: var(--text-muted); font-size: 1.15rem; margin-bottom: 50px; }
+        
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .product-card { 
+            background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 16px; 
+            padding: 30px; text-align: left; transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .product-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0, 240, 255, 0.1); }
+        .product-card h3 { font-size: 1.4rem; color: #fff; margin-bottom: 10px; margin-top: 0; }
+        
+        /* Pricing Style */
+        .product-price { margin-bottom: 20px; display: inline-block; }
+        .quote-btn-text { 
+            font-size: 1.25rem; font-weight: 700; color: #fff; 
+            background: rgba(0, 240, 255, 0.1); border: 1px dashed var(--accent);
+            padding: 6px 14px; border-radius: 6px; display: inline-block;
+            transition: all 0.2s;
+        }
+        .product-card:hover .quote-btn-text { background: rgba(0, 240, 255, 0.2); }
 
-        /* Real Execution Gallery Section (新增的真实截图轮询模块) */
-        .gallery-block { padding: 80px 0; border-top: 1px solid #222; text-align: center; }
-        .gallery-block h2 { font-size: 2.2rem; margin-bottom: 15px; }
-        .gallery-block p { color: var(--text-muted); font-size: 1.1rem; max-width: 800px; margin: 0 auto 40px; }
-        .gallery-carousel { position: relative; width: 100%; max-width: 1000px; margin: 0 auto; height: 600px; border-radius: 10px; overflow: hidden; border: 1px solid #333; box-shadow: 0 15px 40px rgba(0,0,0,0.6); background: #080808; display: flex; justify-content: center; align-items: center; }
-        .gallery-carousel img { max-width: 100%; max-height: 100%; object-fit: contain; opacity: 1; transition: opacity 0.6s ease-in-out; }
-        .gallery-carousel img.fade-out { opacity: 0; }
-        .gallery-loader { position: absolute; color: var(--text-muted); font-family: monospace; font-size: 0.9rem; z-index: 0; }
+        .product-card ul { padding-left: 20px; color: #d1d5db; margin-bottom: 30px; font-size: 0.95rem; }
+        .product-card ul li { margin-bottom: 8px; }
+        .product-card .buy-btn { 
+            display: block; width: 100%; text-align: center; padding: 12px; 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+            color: #fff; border-radius: 8px; font-weight: 600; transition: all 0.2s;
+        }
+        .product-card .buy-btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+        .badge-hot { position: absolute; top: 15px; right: -30px; background: #ef4444; color: #fff; font-size: 0.75rem; font-weight: bold; padding: 4px 30px; transform: rotate(45deg); }
 
-        /* Feature Sections */
-        .feature-block { padding: 80px 0; border-top: 1px solid #222; display: flex; gap: 50px; align-items: center; flex-wrap: wrap; }
+        /* Workflow Section */
+        .workflow-block { padding: 80px 0; background: #030305; border-top: 1px solid var(--border-color); }
+        .workflow-grid { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 50px; }
+        .step-card { flex: 1; min-width: 280px; text-align: center; }
+        .step-num { 
+            width: 50px; height: 50px; background: rgba(0, 240, 255, 0.1); color: var(--accent); 
+            border: 1px solid var(--accent); border-radius: 50%; display: flex; align-items: center; 
+            justify-content: center; font-size: 1.5rem; font-weight: 800; margin: 0 auto 20px; 
+        }
+        .step-card h4 { font-size: 1.2rem; color: #fff; margin-bottom: 12px; }
+        .step-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* Image Gallery Carousel Section */
+        .gallery-block { padding: 80px 0; border-top: 1px solid var(--border-color); text-align: center; position: relative; }
+        .gallery-carousel { 
+            position: relative; width: 100%; max-width: 1000px; margin: 0 auto; height: 520px; 
+            border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); background: #06070a; 
+            display: flex; justify-content: center; align-items: center; 
+        }
+        .gallery-carousel img { 
+            max-width: 95%; max-height: 90%; object-fit: contain; opacity: 0; transform: scale(0.98);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; position: absolute; z-index: 2;
+        }
+        .gallery-carousel img.active { opacity: 1; transform: scale(1); }
+        .gallery-placeholder {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 40px; z-index: 1;
+            background: linear-gradient(180deg, #090b11 0%, #040508 100%); color: var(--text-muted);
+        }
+        .gallery-loader { 
+            font-size: 0.95rem; color: var(--accent); background: rgba(0, 240, 255, 0.08);
+            padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(0, 240, 255, 0.2); font-weight: 500;
+        }
+
+        /* Tech Features */
+        .feature-block { padding: 80px 0; display: flex; gap: 60px; align-items: center; flex-wrap: wrap; border-top: 1px solid var(--border-color); }
         .feature-block.reverse { flex-direction: row-reverse; }
-        .feature-text { flex: 1; min-width: 350px; }
-        .feature-text h2 { font-size: 2.2rem; margin-bottom: 15px; }
-        .feature-text p { color: var(--text-muted); font-size: 1.1rem; }
-        .feature-visual { flex: 1; min-width: 350px; position: relative; }
-
-        /* Badge for Stress Test */
-        .stress-badge { position: absolute; top: -15px; right: 20px; background: var(--term-yellow); color: #000; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; font-family: sans-serif; z-index: 10; box-shadow: 0 4px 10px rgba(255,204,0,0.3); }
-
-        /* Chat UI Simulation */
-        .chat-ui { background: var(--bg-panel); border: 1px solid #333; border-radius: 10px; height: 350px; display: flex; flex-direction: column; }
-        .chat-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; overflow-y: hidden; }
-        .chat-msg { max-width: 80%; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; animation: slideIn 0.3s forwards; opacity: 0; transform: translateY(10px); }
-        .chat-msg.user { align-self: flex-end; background: var(--chat-user); color: white; border-bottom-right-radius: 0; }
-        .chat-msg.ai { align-self: flex-start; background: var(--chat-ai); color: #ddd; border-bottom-left-radius: 0; border: 1px solid #444; }
-
-        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+        .feature-text { flex: 1.1; min-width: 350px; }
+        .feature-text h2 { font-size: 2.2rem; margin-bottom: 20px; font-weight: 800; }
+        .feature-text p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.7; }
+        .feature-visual { flex: 0.9; min-width: 350px; }
 
         /* Footer */
-        footer { padding: 40px 0; border-top: 1px solid #222; text-align: center; color: var(--text-muted); font-size: 0.9rem; }
+        footer { padding: 40px 0; text-align: center; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--border-color); background: #030305;}
         .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
-        .footer-links a:hover { color: var(--text-main); }
+        .footer-links a:hover { color: #fff; }
 
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2.5rem; }
-            .feature-block, .feature-block.reverse { flex-direction: column; gap: 30px; }
-            .gallery-carousel { height: 300px; }
+            .hero { padding: 60px 0; text-align: center; }
+            .hero-actions { justify-content: center; }
+            .feature-block, .feature-block.reverse { flex-direction: column; text-align: center; }
+            .gallery-carousel { height: 350px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="container">
-        <div class="logo">
-            <img src="img/logo.jpg" alt="SecureOps-Agent Logo" class="logo-img" onerror="this.style.display='none'">
-            SecureOps-Agent
-        </div>
-        <div class="nav-actions">
-            <button class="btn-lang" onclick="toggleLanguage()" id="langBtn">🌐 中文 / EN</button>
-            <button class="btn-primary" data-i18n="nav_login">Get Started</button>
+    <div style="position: relative; overflow: hidden; width: 100%;"><div class="glow-bg"></div></div>
+
+    <nav>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="logo">
+                <svg class="logo-svg" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span>AutoDeploy-Agent</span>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-lang" onclick="toggleLanguage()">🌐 中文 / EN</button>
+                <a href="https://52.206.140.53:13221" class="btn-primary" data-i18n="nav_login">购买序列号</a>
+            </div>
         </div>
     </nav>
 
-    <!-- Block 1: Hero -->
     <section class="container hero">
         <div class="hero-content">
-            <h1 data-i18n="hero_title">Adaptive Deployment Agent</h1>
-            <p data-i18n="hero_desc">Translate natural language into executable, self-healing environment deployments. Built-in cross-platform defenses safeguard every infrastructure build.</p>
-            <a class="btn-primary" href="https://52.206.140.53:13221" style="display: inline-block; padding: 12px 24px; font-size: 1.1rem; background: var(--accent); color: white; text-decoration: none;" data-i18n="hero_cta">Deploy Now</a>
+            <h1 data-i18n="hero_title">全自动无人值守部署服务</h1>
+            <p data-i18n="hero_desc">无需懂 Linux，无需繁琐的命令行。专为 WordPress、Stable Diffusion 等热门环境打造。一键输入序列号，我们的机器探针为您自动配置服务器一切环境与安全策略。</p>
+            <div class="hero-actions">
+                <a href="https://52.206.140.53:13221" class="btn-gradient" data-i18n="hero_cta1">立即获取报价</a>
+                <a href="https://github.com/ai-heixiaobai/agent/releases/download/V1.0/win.zip" class="btn-primary" style="padding: 14px 28px; font-size: 1.05rem;" data-i18n="hero_cta2_win">下载 Windows 客户端</a>
+                <a href="https://github.com/ai-heixiaobai/agent/releases/download/V1.0/linux.zip" class="btn-primary" style="padding: 14px 28px; font-size: 1.05rem;" data-i18n="hero_cta2_lin">下载 Linux 客户端</a>
+            </div>
         </div>
         <div class="hero-visual">
             <div class="mac-window">
                 <div class="mac-header">
                     <div class="mac-dot r"></div><div class="mac-dot y"></div><div class="mac-dot g"></div>
-                    <div class="mac-title">agent_execution_log.sh</div>
+                    <div class="mac-title" data-i18n="term_title_wp">agent_deploy_wordpress.log</div>
                 </div>
                 <div class="mac-body" id="term-hero"></div>
             </div>
         </div>
     </section>
 
-    <!-- Block 1.5: Real-world Execution Gallery (新增轮询截图模块) -->
+    <section class="container products-block">
+        <h2 class="section-title" data-i18n="prod_title">热门一键部署方案</h2>
+        <p class="section-desc" data-i18n="prod_desc">标准化环境打包，AI 在线自动报价，购买后系统秒级发卡</p>
+        
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="badge-hot">HOT</div>
+                <h3 data-i18n="p1_name">Stable Diffusion WebUI</h3>
+                <div class="product-price">
+                    <div class="quote-btn-text" data-i18n="price_quote">点击获取报价</div>
+                </div>
+                <ul>
+                    <li data-i18n="p1_f1">包含 NVIDIA CUDA 驱动自动配置</li>
+                    <li data-i18n="p1_f2">自动安装 Python & Git 依赖</li>
+                    <li data-i18n="p1_f3">内存溢出自动保护机制</li>
+                    <li data-i18n="p1_f4">部署后直接获取局域网/公网访问地址</li>
+                </ul>
+                <a href="https://52.206.140.53:13221" class="buy-btn" data-i18n="btn_buy">与 AI 沟通需求并获取授权码</a>
+            </div>
+
+            <div class="product-card">
+                <h3 data-i18n="p2_name">LAMP</h3>
+                <div class="product-price">
+                    <div class="quote-btn-text" data-i18n="price_quote">点击获取报价</div>
+                </div>
+                <ul>
+                    <li data-i18n="p2_f1">完整 LAMP/LEMP 环境搭建</li>
+                    <li data-i18n="p2_f2">MySQL 数据库全自动初始化</li>
+                    <li data-i18n="p2_f3">伪静态与权限修复自动处理</li>
+                    <li data-i18n="p2_f4">纯净无后门源码拉取</li>
+                </ul>
+                <a href="https://52.206.140.53:13221" class="buy-btn" data-i18n="btn_buy">与 AI 沟通需求并获取授权码</a>
+            </div>
+
+            <div class="product-card">
+                <h3 data-i18n="p3_name">高性能 WordPress 建站</h3>
+                <div class="product-price">
+                    <div class="quote-btn-text" data-i18n="price_quote">点击获取报价</div>
+                </div>
+                <ul>
+                    <li data-i18n="p3_f1">Nginx + PHP8.x + Redis 缓存优化</li>
+                    <li data-i18n="p3_f2">SSL 证书自动申请与部署</li>
+                    <li data-i18n="p3_f3">数据库高危端口自动屏蔽</li>
+                    <li data-i18n="p3_f4">带极简美观的默认探针测试页</li>
+                </ul>
+                <a href="https://52.206.140.53:13221" class="buy-btn" data-i18n="btn_buy">与 AI 沟通需求并获取授权码</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="workflow-block">
+        <div class="container text-center">
+            <h2 class="section-title" data-i18n="work_title" style="text-align: center;">如何运作？</h2>
+            <p class="section-desc" data-i18n="work_desc" style="text-align: center;">三步搞定，彻底解放您的双手</p>
+            <div class="workflow-grid">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h4 data-i18n="w1_title">与 AI 沟通并获取报价</h4>
+                    <p data-i18n="w1_desc">直接点击您需要的服务方案，我们的 AI 助手会确认您的具体需求，完成安全付款后将立即发放专属序列号 (KEY)。</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h4 data-i18n="w2_title">运行本地客户端</h4>
+                    <p data-i18n="w2_desc">下载极轻量客户端，输入授权序列号，根据本地或远程服务器选择执行（远程需要IP和用户名）。</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h4 data-i18n="w3_title">无人值守执行</h4>
+                    <p data-i18n="w3_desc">剩下的交给我们的执行探针。您可以去喝杯咖啡，5分钟后返回即可得到完美配置的可用环境。（5分钟根据网络和任务复杂度而定并非承诺5分钟完成）</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="container gallery-block">
-        <h2 data-i18n="gal_title">Real-world Execution Records</h2>
-        <p data-i18n="gal_desc">Witness the agent in action. Automatically syncing and displaying authentic, unmodified execution screenshots from production environments.</p>
+        <h2 class="section-title" style="color:#fff;" data-i18n="gal_title">系统真实运行全记录</h2>
+        <p class="section-desc" data-i18n="gal_desc">见证智能体的真实工作流。此区块滚动展示未经修饰的原始执行截图日志。</p>
         <div class="gallery-carousel">
-            <div class="gallery-loader" id="gal-loader">Initializing Data Stream...</div>
-            <img id="carousel-img" src="" alt="Execution Record" style="z-index: 1;">
-        </div>
-    </section>
-
-    <!-- Block 2: Intent-based Security Audit -->
-    <section class="container feature-block reverse">
-        <div class="feature-text">
-            <h2 data-i18n="sec_title">Semantic Security Firewall</h2>
-            <p data-i18n="sec_desc">We abandon rigid regex blocking. Our engine reads contextual intent. We subject our agent to intense adversarial stress tests to ensure it only permits commands strictly aligned with the deployment goal, effectively neutralizing privilege escalation and masqueraded payloads.</p>
-        </div>
-        <div class="feature-visual">
-            <div class="stress-badge" data-i18n="sec_badge">⚠️ STRESS TEST SIMULATION</div>
-            <div class="mac-window">
-                <div class="mac-header">
-                    <div class="mac-dot r"></div><div class="mac-dot y"></div><div class="mac-dot g"></div>
-                    <div class="mac-title">security_audit_test.ps1</div>
-                </div>
-                <div class="mac-body" id="term-security" style="height: 380px;"></div>
+            <div class="gallery-placeholder" id="gal-placeholder">
+                <div class="gallery-loader" id="gal-loader">正在初始化执行日志轮播组件...</div>
             </div>
+            <img id="carousel-img" src="" alt="Execution Record">
         </div>
     </section>
 
-    <!-- Block 3: Self-Healing -->
-    <section class="container feature-block">
+    <section class="container feature-block reverse" style="position: relative;">
         <div class="feature-text">
-            <h2 data-i18n="heal_title">Autonomous Error Resolution</h2>
-            <p data-i18n="heal_desc">Production environments are unpredictable. When encountering dependency conflicts or read-only locks, the agent dynamically adjusts its strategy, breaking down operations into safer sub-tasks to ensure reliable delivery without manual intervention.</p>
+            <h2 data-i18n="sec_title">不仅高效，更加安全</h2>
+            <p data-i18n="sec_desc">不要将您的服务器交给来路不明的脚本。我们的底层代理引擎内置“意图级审计防线”。在无人值守安装过程中，系统会实时拦截所有与环境配置无关的恶意指令（如破坏文件、非法越权提权），并在部署前自动创建还原点快照。</p>
         </div>
         <div class="feature-visual">
             <div class="mac-window">
                 <div class="mac-header">
                     <div class="mac-dot r"></div><div class="mac-dot y"></div><div class="mac-dot g"></div>
-                    <div class="mac-title">self_healing_routine.log</div>
+                    <div class="mac-title">security_audit_engine.ps1</div>
                 </div>
-                <div class="mac-body" id="term-heal"></div>
+                <div class="mac-body" id="term-security" style="height: 300px;"></div>
             </div>
         </div>
     </section>
 
-    <!-- Block 4: Privacy & Backups -->
-    <section class="container feature-block reverse">
-        <div class="feature-text">
-            <h2 data-i18n="priv_title">Zero-Trust & Snapshots</h2>
-            <p data-i18n="priv_desc">Sensitive credentials flow ephemerally within local memory variables via mTLS tunnels—never touching the disk or cloud. Combined with automated pre-deployment configuration snapshots, you retain full rollback capabilities.</p>
-        </div>
-        <div class="feature-visual">
-            <div class="chat-ui">
-                <div class="mac-header" style="border-bottom: 1px solid #333;">
-                    <div class="mac-title" style="color: #ccc; text-align: left;" data-i18n="chat_header">🔐 Auth Required</div>
-                </div>
-                <div class="chat-body" id="chat-privacy">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </div>
-    </section>
+    <div style="position: relative; overflow: hidden; width: 100%;"><div class="glow-bg-right"></div></div>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-links">
-                <a href="legal.html#tos" data-i18n="foot_tos">Terms of Service</a>
-                <a href="legal.html#privacy" data-i18n="foot_privacy">Privacy Policy</a>
-                <a href="legal.html#refund" data-i18n="foot_refund">Refund Policy</a>
+                <a href="legal.html#tos" data-i18n="foot_tos">服务条款</a>
+                <a href="legal.html#privacy" data-i18n="foot_privacy">隐私政策 & 安全承诺</a>
+                <a href="legal.html#refund" data-i18n="foot_refund">售后退款</a>
             </div>
-            <div style="margin-bottom: 10px;" data-i18n="foot_contact">Contact & Support: you_main@outlook.com (Mon-Fri 9:00-18:00)</div>
-            <div>&copy; 2026 SecureOps-Agent. All rights reserved.</div>
+            <div data-i18n="foot_contact">商业合作及技术支持: you_main@outlook.com</div>
+            <div style="margin-top: 10px; opacity: 0.5;">&copy; 2026 AutoDeploy-Agent. Automated & Unattended.</div>
         </div>
     </footer>
 
@@ -220,51 +372,119 @@
         // ================= Language Data =================
         const i18n = {
             en: {
-                nav_login: "Get Started",
-                hero_title: "Adaptive Deployment Agent",
-                hero_desc: "Translate natural language into executable, self-healing environment deployments. Built-in cross-platform defenses safeguard every infrastructure build.",
-                hero_cta: "Deploy Now",
+                nav_login: "Buy Key",
+                hero_title: "Fully Automated Unattended Deployment",
+                hero_desc: "No Linux skills needed. No complex command lines. Specially built for standard environments like WordPress, Stable Diffusion, and OpenClaw. Just enter your serial key, and our agent sets up everything securely.",
+                hero_cta1: "Get a Quote",
+                hero_cta2_win: "Download Client (Win)",
+                hero_cta2_lin: "Download Client (Linux)",
+                term_title_wp: "agent_deploy_wordpress.log",
+                
+                prod_title: "Popular Deployment Packages",
+                prod_desc: "Standardized environment builds. Chat with AI for an instant quote, receive your key immediately after purchase.",
+                
+                price_quote: "Click for Quote",
+                
+                p1_name: "Stable Diffusion WebUI",
+                p1_f1: "NVIDIA CUDA driver auto-config",
+                p1_f2: "Python & Git dependencies auto-install",
+                p1_f3: "Out-of-memory protection setup",
+                p1_f4: "Ready-to-use WebUI URL upon completion",
+                
+                p2_name: "LAMP",
+                p2_f1: "Complete LAMP/LEMP stack setup",
+                p2_f2: "MySQL auto-initialization",
+                p2_f3: "Pseudo-static & permission auto-fix",
+                p2_f4: "Clean source code deployment",
+
+                p3_name: "High-Performance WordPress",
+                p3_f1: "Nginx + PHP8.x + Redis Cache optimization",
+                p3_f2: "SSL certificate auto-generation",
+                p3_f3: "High-risk database ports shielding",
+                p3_f4: "Includes a clean test index page",
+                
+                btn_buy: "Chat with AI to Get Your Key",
+
+                work_title: "How It Works?",
+                work_desc: "Three simple steps for a completely hands-free deployment.",
+                w1_title: "1. Chat for Quote",
+                w1_desc: "Select a package, chat with our AI to confirm your exact needs, and securely complete payment to receive your KEY.",
+                w2_title: "2. Run Client",
+                w2_desc: "Download the lightweight client, enter your serial KEY, and choose local or remote server (remote setup requires IP and username).",
+                w3_title: "3. Unattended Setup",
+                w3_desc: "Leave the rest to our execution agent. Go grab a coffee, and return in 5 minutes to a perfectly configured environment. (The 5-minute timeframe depends on network and task complexity and is not a guaranteed commitment.)",
+
                 gal_title: "Real-world Execution Records",
-                gal_desc: "Witness the agent in action. Automatically syncing and displaying authentic, unmodified execution screenshots from production environments.",
-                sec_title: "Semantic Security Firewall",
-                sec_desc: "We abandon rigid regex blocking. Our engine reads contextual intent. We subject our agent to intense adversarial stress tests to ensure it only permits commands strictly aligned with the deployment goal, effectively neutralizing privilege escalation and masqueraded payloads.",
-                sec_badge: "⚠️ STRESS TEST SIMULATION",
-                heal_title: "Autonomous Error Resolution",
-                heal_desc: "Production environments are unpredictable. When encountering dependency conflicts or read-only locks, the agent dynamically adjusts its strategy, breaking down operations into safer sub-tasks to ensure reliable delivery without manual intervention.",
-                priv_title: "Zero-Trust & Snapshots",
-                priv_desc: "Sensitive credentials flow ephemerally within local memory variables via mTLS tunnels—never touching the disk or cloud. Combined with automated pre-deployment configuration snapshots, you retain full rollback capabilities.",
-                chat_header: "🔐 Local Agent Interface",
+                gal_desc: "Witness the agent in action. Displaying authentic, unmodified execution screenshots from production environments.",
+
+                sec_title: "Fast, and Secure.",
+                sec_desc: "Don't hand your server to unknown scripts. Our agent engine features an 'Intent-level Audit Firewall'. During unattended installation, it intercepts any malicious commands unrelated to the deployment, and creates configuration snapshots automatically.",
+
                 foot_tos: "Terms of Service",
-                foot_privacy: "Privacy Policy",
+                foot_privacy: "Privacy & Security Policy",
                 foot_refund: "Refund Policy",
-                foot_contact: "Contact & Support: you_main@outlook.com (Mon-Fri 9:00-18:00)"
+                foot_contact: "Support & Business: you_main@outlook.com"
             },
             zh: {
-                nav_login: "开始使用",
-                hero_title: "自适应环境部署智能体",
-                hero_desc: "将自然语言转化为可落地的自动化部署方案。内置跨平台防线与环境自适应能力，护航每一次基础设施构建。",
-                hero_cta: "立即部署",
+                nav_login: "购买序列号",
+                hero_title: "全自动无人值守部署服务",
+                hero_desc: "无需懂 Linux，无需繁琐的命令行。专为 WordPress、Stable Diffusion 等热门环境打造。一键输入序列号，我们的机器探针为您自动配置服务器一切环境与安全策略。",
+                hero_cta1: "立即获取报价",
+                hero_cta2_win: "下载 Windows 客户端",
+                hero_cta2_lin: "下载 Linux 客户端",
+                term_title_wp: "agent_deploy_wordpress.log",
+                
+                prod_title: "热门一键部署方案",
+                prod_desc: "标准化环境打包，AI 在线自动报价，购买后系统秒级发卡",
+                
+                price_quote: "点击获取报价",
+                
+                p1_name: "Stable Diffusion WebUI",
+                p1_f1: "包含 NVIDIA CUDA 驱动自动配置",
+                p1_f2: "自动安装 Python & Git 依赖",
+                p1_f3: "内存溢出自动保护机制",
+                p1_f4: "部署后直接获取局域网/公网访问地址",
+                
+                p2_name: "LAMP",
+                p2_f1: "完整 LAMP/LEMP 环境搭建",
+                p2_f2: "MySQL 数据库全自动初始化",
+                p2_f3: "伪静态与权限修复自动处理",
+                p2_f4: "纯净无后门源码拉取",
+
+                p3_name: "高性能 WordPress 建站",
+                p3_f1: "Nginx + PHP8.x + Redis 缓存优化",
+                p3_f2: "SSL 证书自动申请与部署",
+                p3_f3: "数据库高危端口自动屏蔽",
+                p3_f4: "带极简美观的默认探针测试页",
+                
+                btn_buy: "与 AI 沟通需求并获取授权码",
+
+                work_title: "如何运作？",
+                work_desc: "三步搞定，彻底解放您的双手",
+                w1_title: "与 AI 沟通并获取报价",
+                w1_desc: "直接点击您需要的服务方案，我们的 AI 助手会确认您的具体需求，完成安全付款后将立即发放专属序列号 (KEY)。",
+                w2_title: "运行本地客户端",
+                w2_desc: "下载极轻量客户端，输入授权序列号，根据本地或远程服务器选择执行（远程需要IP和用户名）。",
+                w3_title: "无人值守执行",
+                w3_desc: "剩下的交给我们的执行探针。您可以去喝杯咖啡，5分钟后返回即可得到完美配置的可用环境。（5分钟根据网络和任务复杂度而定并非承诺5分钟完成）",
+
                 gal_title: "系统真实运行全记录",
-                gal_desc: "见证智能体的真实工作流。此区块自动同步并滚动展示来自生产环境、未经修饰的原始执行截图日志。",
-                sec_title: "语义级意图防线",
-                sec_desc: "摒弃死板的正则拦截。我们通过极限对抗级别的压力测试（Stress Test），向您证明我们的引擎能读懂上下文意图。仅放行与部署任务严格一致的必要指令，从根本上免疫越权破坏与伪装代码注入。",
-                sec_badge: "⚠️ 极端压力测试演示",
-                heal_title: "韧性部署与异常自愈",
-                heal_desc: "生产环境错综复杂。遇到依赖冲突、网络阻断或权限锁定等异常时，智能体将自动重组策略，将高风险操作降解为安全子任务，以确保部署链路的高可用交付。",
-                priv_title: "零信任凭证与安全快照",
-                priv_desc: "敏感凭证仅通过 mTLS 加密隧道在本地内存环境变量中瞬间流转，绝不落盘、绝不上云。配合执行前的自动化平衡型快照备份，确保您随时拥有安全回滚的权利。",
-                chat_header: "🔐 本地探针交互界面",
+                gal_desc: "见证智能体的真实工作流。此区块滚动展示未经修饰的原始执行截图日志。",
+
+                sec_title: "不仅高效，更加安全",
+                sec_desc: "不要将您的服务器交给来路不明的脚本。我们的底层代理引擎内置“意图级审计防线”。在无人值守安装过程中，系统会实时拦截所有与环境配置无关的恶意指令（如破坏文件、非法越权提权），并在部署前自动创建还原点快照。",
+
                 foot_tos: "服务条款",
-                foot_privacy: "隐私政策",
-                foot_refund: "退款政策",
-                foot_contact: "联系我们: you_main@outlook.com (周一至周五 9:00-18:00)"
+                foot_privacy: "隐私政策 & 安全承诺",
+                foot_refund: "售后退款",
+                foot_contact: "商业合作及技术支持: you_main@outlook.com"
             }
         };
 
-        let currentLang = 'en';
+        let currentLang = 'zh';
 
         function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (i18n[currentLang][key]) {
@@ -274,168 +494,100 @@
             restartAnimations();
         }
 
-        // ================= Image Gallery Carousel Logic =================
+        // ================= Image Gallery Logic =================
         let imgIndex = 1;
         let maxFound = false;
         let maxImageIndex = 999; 
         const imgEl = document.getElementById('carousel-img');
+        const placeholderEl = document.getElementById('gal-placeholder');
         const loaderEl = document.getElementById('gal-loader');
 
-        // Initial Load
         const firstImg = new Image();
         firstImg.onload = function() {
             imgEl.src = this.src;
-            loaderEl.style.display = 'none';
+            imgEl.classList.add('active');
+            placeholderEl.style.display = 'none';
         };
         firstImg.onerror = function() {
-            loaderEl.innerText = "[ No images found in /img folder. Please add 1.jpg, 2.jpg... ]";
+            loaderEl.innerText = "Demo Environment Active";
+            loaderEl.style.borderColor = "rgba(16, 185, 129, 0.2)";
+            loaderEl.style.color = "var(--term-green)";
+            loaderEl.style.background = "rgba(16, 185, 129, 0.08)";
         };
         firstImg.src = 'img/1.jpg';
 
         function loadNextImage() {
-            imgEl.classList.add('fade-out');
-            
+            if (placeholderEl.style.display !== 'none') return; 
+            imgEl.classList.remove('active');
             setTimeout(() => {
                 let nextIndex = imgIndex + 1;
-                // If we already know the limit, loop back instantly
-                if (maxFound && nextIndex > maxImageIndex) {
-                    nextIndex = 1;
-                }
-                
+                if (maxFound && nextIndex > maxImageIndex) { nextIndex = 1; }
                 let tempImg = new Image();
                 tempImg.onload = function() {
                     imgIndex = nextIndex;
                     imgEl.src = this.src;
-                    imgEl.classList.remove('fade-out');
+                    imgEl.classList.add('active');
                 };
                 tempImg.onerror = function() {
-                    // Hit the limit of consecutive files
-                    if (!maxFound && imgIndex > 0) {
-                        maxFound = true;
-                        maxImageIndex = imgIndex;
-                    }
-                    // Loop back to 1
+                    if (!maxFound && imgIndex > 0) { maxFound = true; maxImageIndex = imgIndex; }
                     imgIndex = 1;
                     imgEl.src = 'img/1.jpg'; 
-                    imgEl.classList.remove('fade-out');
+                    imgEl.classList.add('active');
                 };
                 tempImg.src = `img/${nextIndex}.jpg`;
-            }, 600); // Wait for fade-out CSS transition
+            }, 500);
         }
+        setInterval(loadNextImage, 5000);
 
-        // Start cycling images every 4 seconds
-        setInterval(loadNextImage, 4000);
-
-
-        // ================= Terminal Animation Logic =================
+        // ================= Terminal Animation Data =================
         const termData = {
             hero: {
                 en: [
-                    "<span class='t-dim'>[01:09:19]</span>",
-                    "<span class='t-blue'>🧠 Master AI Thought: I have acquired the SOP. I will update the package index and install Apache HTTP server...</span>",
-                    "💻 Attempting to connect to remote host: 192.168.137.130 (User: ubuntu)...",
-                    "🚀 Synchronously executing remote command (auto-handled permissions)...",
-                    "<span class='t-yellow'>[sudo] password for ubuntu: ********</span>",
-                    "Hit:1 https://mirrors.ubuntu.com focal InRelease",
-                    "Reading package lists... Done",
-                    "Building dependency tree...",
-                    "Unpacking apache2-bin (2.4.41-4ubuntu3.23)...",
-                    "<span class='t-green'>✅ Execution finished. Return code: 0</span>"
+                    "<span class='t-dim'>[02:14:01]</span> <span class='t-prompt'>deploy_agent:~$</span> 🔑 Validating Auth KEY-EA47D91CD431... <span class='t-green'>Success</span>",
+                    "<span class='t-dim'>[02:14:02]</span> <span class='t-prompt'>deploy_agent:~$</span> 🎯 Target Package: [High-Performance WordPress]",
+                    "<span class='t-dim'>[02:14:03]</span> 💻 Establishing secure local mTLS tunnel to Target IP...",
+                    "<span class='t-dim'>[02:14:05]</span> 📦 Installing Nginx, PHP8.x, and dependencies (Unattended Mode)...",
+                    "<span class='t-dim'>[02:14:22]</span> 🗄️ Initializing MySQL database and generating secure randomized credentials...",
+                    "<span class='t-dim'>[02:14:35]</span> ⚙️ Applying optimal Nginx rewrite rules and securing wp-config.php...",
+                    "<span class='t-dim'>[02:14:40]</span> <span class='t-green'>✅ Deployment Completed Successfully! Total time: 00:03:14</span>",
+                    "<span class='t-dim'>[02:14:41]</span> 🌐 URL: http://your-ip  |  Status: ONLINE"
                 ],
                 zh: [
-                    "<span class='t-dim'>[01:09:19]</span>",
-                    "<span class='t-blue'>🧠 主控AI思考: 已获取安装规范。我将更新包索引并开始安装 Apache 服务...</span>",
-                    "💻 尝试连接远程主机: 192.168.137.130 (用户: ubuntu)...",
-                    "🚀 同步执行远程指令 (已自动处理提权与防挂断机制)...",
-                    "<span class='t-yellow'>[sudo] password for ubuntu: ********</span>",
-                    "Hit:1 https://mirrors.ubuntu.com focal InRelease",
-                    "正在读取软件包列表... 完成",
-                    "正在分析软件包的依赖关系树...",
-                    "正在解包 apache2-bin (2.4.41-4ubuntu3.23)...",
-                    "<span class='t-green'>✅ 执行结束。返回码: 0</span>"
+                    "<span class='t-dim'>[02:14:01]</span> <span class='t-prompt'>deploy_agent:~$</span> 🔑 正在验证授权序列号 KEY-EA47D91CD431... <span class='t-green'>验证通过</span>",
+                    "<span class='t-dim'>[02:14:02]</span> <span class='t-prompt'>deploy_agent:~$</span> 🎯 检测到部署任务: [高性能 WordPress 建站环境]",
+                    "<span class='t-dim'>[02:14:03]</span> 💻 正在建立到目标主机的安全隧道连接 (免密鉴权)...",
+                    "<span class='t-dim'>[02:14:05]</span> 📦 正在后台静默安装 Nginx, PHP8.x 及其核心组件...",
+                    "<span class='t-dim'>[02:14:22]</span> 🗄️ 正在初始化 MySQL 数据库，自动生成高强度随机密码...",
+                    "<span class='t-dim'>[02:14:35]</span> ⚙️ 正在应用防注入 Nginx 伪静态规则并锁定核心文件权限...",
+                    "<span class='t-dim'>[02:14:40]</span> <span class='t-green'>✅ 环境自动化部署大功告成！总耗时: 00:03:14</span>",
+                    "<span class='t-dim'>[02:14:41]</span> 🌐 您的站点已上线，请直接访问服务器 IP 地址。"
                 ]
             },
             security: {
                 en: [
-                    "<span class='t-dim'>[SYSTEM] INITIATING SECURITY STRESS TEST PROTOCOL...</span>",
-                    "<br>[*] INTERCEPTED REQUEST (Task ID: 0x07D2)",
-                    "❓ <span class='t-dim'>User Intent:</span> <span class='t-yellow'>Clean up temporary system cache to free up space.</span>",
-                    "⛔ <span class='t-dim'>Raw Command:</span> <span class='t-blue'>Remove-Item -Path 'C:\\Users\\*\\Documents\\*' -Recurse -Force</span>",
-                    "<span class='t-red'>[STATUS: CRITICAL] ❌ Intent Deviation: High-risk payload detected. Attempted to wipe User Documents instead of Cache.</span>",
-                    "<br>[*] INTERCEPTED REQUEST (Task ID: 0x07D4)",
-                    "❓ <span class='t-dim'>User Intent:</span> <span class='t-yellow'>Reset the isolated testing sandbox environment (Drive Z).</span>",
-                    "✅ <span class='t-dim'>Raw Command:</span> <span class='t-blue'>Format-Volume -DriveLetter Z -Confirm:$false</span>",
-                    "<span class='t-green'>[STATUS: TRUSTED] ✅ Sandbox Exception: Target resides within a designated low-integrity zone. Execution permitted.</span>"
+                    "<span class='t-dim'>[*] INTERCEPTED EXECUTION REQUEST (Task ID: WP-0x02)</span>",
+                    "❓ <span class='t-dim'>Original Intent:</span> <span class='t-yellow'>Remove default Nginx web pages</span>",
+                    "⛔ <span class='t-dim'>Raw Command:</span> <span class='t-blue'>rm -rf /var/www/html/* && rm -rf /etc/nginx/</span>",
+                    "<span class='t-red'>[CRITICAL INTERCEPT] ❌ High-risk payload. Attempting to delete core web server configs.</span>",
+                    "<span class='t-green'>✅ Auto-Healing: Replacing with safe command: `rm /var/www/html/index.nginx-debian.html`</span>"
                 ],
                 zh: [
-                    "<span class='t-dim'>[系统] 正在初始化极限压力防御测试序列...</span>",
-                    "<br>[*] 捕获到执行请求 (Task ID: 0x07D2)",
-                    "❓ <span class='t-dim'>原始用户意图：</span><span class='t-yellow'>帮我清理一下系统运行产生的临时缓存文件。</span>",
-                    "⛔ <span class='t-dim'>底层截获指令：</span><span class='t-blue'>Remove-Item -Path 'C:\\Users\\*\\Documents\\*' -Recurse -Force</span>",
-                    "<span class='t-red'>[安全级别: 致命] ❌ 高危破坏拦截：挂羊头卖狗肉。识别到目标与实际操作严重违背，企图删除用户核心文档资产！</span>",
-                    "<br>[*] 捕获到执行请求 (Task ID: 0x07D4)",
-                    "❓ <span class='t-dim'>原始用户意图：</span><span class='t-yellow'>清空作为临时沙盒测试用的 Z 盘。</span>",
-                    "✅ <span class='t-dim'>底层截获指令：</span><span class='t-blue'>Format-Volume -DriveLetter Z -Confirm:$false</span>",
-                    "<span class='t-green'>[安全级别: 授信] ✅ 安全沙盒放行：触发特定隔离区规则。经核实 Z 盘为特权沙盒区，操作安全。</span>"
-                ]
-            },
-            heal: {
-                en: [
-                    "<span class='t-dim'>[15:51:21]</span>",
-                    "<span class='t-blue'>🧠 AI Thought: It seems the `sed` command didn't fully remove all CD-ROM references in sources.list. I will use a more aggressive approach to comment them out...</span>",
-                    "✅ Execution complete, result reported to cloud.",
-                    "<br><span class='t-dim'>[15:51:44]</span>",
-                    "<span class='t-red'>❌ Error: The CD-ROM repository error persists. The file is read-only.</span>",
-                    "<span class='t-blue'>🧠 AI Thought: The previous command was rejected by the security policy. I will break it down into smaller, safer operations. First, I'll identify the exact line...</span>",
-                    "✅ Execution complete, result reported to cloud.",
-                    "<br><span class='t-dim'>[15:55:01]</span>",
-                    "<span class='t-green'>✅ Resolution Success: Problematic lines bypassed. Proceeding with deployment.</span>"
-                ],
-                zh: [
-                    "<span class='t-dim'>[15:51:21]</span>",
-                    "<span class='t-blue'>🧠 主控AI思考: 看来 `sed` 命令没能完全移除 sources.list 中的 CD-ROM 依赖。我将采用更严格的替换策略进行注释...</span>",
-                    "✅ 执行完毕，结果已上报云端。",
-                    "<br><span class='t-dim'>[15:51:44]</span>",
-                    "<span class='t-red'>❌ 执行错误: CD-ROM 源报错依然存在，且目标文件处于只读锁定状态。</span>",
-                    "<span class='t-blue'>🧠 主控AI思考: 上一个强制覆写指令被系统安全策略阻断。我将调整策略，将操作降解为更小粒度的安全子任务，先读取再重构...</span>",
-                    "✅ 执行完毕，结果已上报云端。",
-                    "<br><span class='t-dim'>[15:55:01]</span>",
-                    "<span class='t-green'>✅ 异常自愈成功: 已绕过损坏的依赖源，环境就绪，继续执行核心部署。</span>"
+                    "<span class='t-dim'>[*] 捕获到底层执行请求 (Task ID: WP-0x02)</span>",
+                    "❓ <span class='t-dim'>任务意图：</span><span class='t-yellow'>清理 Nginx 默认安装页面以便部署 WP</span>",
+                    "⛔ <span class='t-dim'>原始指令：</span><span class='t-blue'>rm -rf /var/www/html/* && rm -rf /etc/nginx/</span>",
+                    "<span class='t-red'>[致命级阻断] ❌ 检测到高危破坏行为，企图删除整个 Web 引擎的配置文件。</span>",
+                    "<span class='t-green'>✅ 自动修正：已剥离恶意参数，重定向执行安全指令 `rm /var/www/html/index.nginx-debian.html`</span>"
                 ]
             }
         };
 
-        const chatData = {
-            en: [
-                { role: 'ai', text: "⚠️ System deployment involves modifying configurations. A [System Restore Point] is highly recommended. Proceed?" },
-                { role: 'user', text: "Y" },
-                { role: 'ai', text: "Creating snapshot... ✅ Backup Successful!<br>Your system is now protected." },
-                { role: 'ai', text: "🛡️ <b>Remote Request for Security Credential</b><br><br>Please enter the password for the remote server. <br><i style='font-size:0.8rem;color:#888'>Notice: Data temporarily kept in local memory env vars, never uploaded to cloud.</i>" },
-                { role: 'user', text: "********" },
-                { role: 'ai', text: "✅ User securely completed input. Data saved to local temp variable <code>$TEMP_SEC_A1B2</code>." }
-            ],
-            zh: [
-                { role: 'ai', text: "⚠️ 系统自动化部署可能会修改环境变量或配置。强烈建议在此之前创建一个【系统还原点】平衡型备份。是否继续？" },
-                { role: 'user', text: "Y" },
-                { role: 'ai', text: "正在创建快照... ✅ 备份成功！<br>您的系统现已获得恢复保护。" },
-                { role: 'ai', text: "🛡️ <b>远程节点请求安全凭证</b><br><br>请输入目标服务器的连接密码。<br><i style='font-size:0.8rem;color:#888'>安全提示: 此数据仅临时保留在本机内存中，绝不会通过网络上传至云端服务器，请放心输入。</i>" },
-                { role: 'user', text: "********" },
-                { role: 'ai', text: "✅ 用户已安全完成输入。数据已加密存入本地临时环境变量 <code>$TEMP_SEC_A1B2</code>。" }
-            ]
-        };
-
         let timers = [];
-
-        function clearTimers() {
-            timers.forEach(clearTimeout);
-            timers = [];
-        }
+        function clearTimers() { timers.forEach(clearTimeout); timers = []; }
 
         function renderTerminal(elementId, lines, speedMs = 400) {
             const el = document.getElementById(elementId);
             el.innerHTML = '';
             let currentDelay = 0;
-            
             lines.forEach((line) => {
                 timers.push(setTimeout(() => {
                     const div = document.createElement('div');
@@ -448,37 +600,13 @@
             });
         }
 
-        function renderChat(lang) {
-            const el = document.getElementById('chat-privacy');
-            el.innerHTML = '';
-            let currentDelay = 500;
-
-            chatData[lang].forEach(msg => {
-                timers.push(setTimeout(() => {
-                    const div = document.createElement('div');
-                    div.className = `chat-msg ${msg.role}`;
-                    div.innerHTML = msg.text;
-                    el.appendChild(div);
-                    el.scrollTop = el.scrollHeight;
-                }, currentDelay));
-                currentDelay += 1000;
-            });
-        }
-
         function restartAnimations() {
             clearTimers();
-            renderTerminal('term-hero', termData.hero[currentLang], 300);
-            renderTerminal('term-security', termData.security[currentLang], 800);
-            renderTerminal('term-heal', termData.heal[currentLang], 1000);
-            renderChat(currentLang);
+            renderTerminal('term-hero', termData.hero[currentLang], 500);
+            renderTerminal('term-security', termData.security[currentLang], 900);
         }
 
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (i18n[currentLang][key]) el.innerText = i18n[currentLang][key];
-            });
             restartAnimations();
         });
 
